@@ -1,0 +1,4 @@
+target:
+	gcc -o ChatMsnVF ChatMsnVF.c 
+clean:
+	rm -f *.o
