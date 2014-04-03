@@ -8,6 +8,9 @@
 #include <sys/socket.h>        // Definiciones de estructuras utilizadas por la funcion socket
 #include <netinet/in.h>        // Definiciones para el manejo de red
 #include <netdb.h>             // Definiciones para el manejo de la base de datos de la red
+#include <signal.h>
+
+
 
 /** Macros utilizadas **/
 
@@ -38,21 +41,17 @@ char puerto[8];                // Contiene el puerto del contacto al que se va a
 // Menu y metodos de entrada al sistema
 
 int Menu();
-int Ingresar();
-int NuevoUsuario();
-
+int GuardarPuerto();
 
 // Carga de datos del usuario del sistema
 
-int CargarPuerto();
 int Verificar(char[],char[]);
-int ExisteUsuario(char[]);
-
+int CargarPuerto();
 
 // Manejo de contactos
 
-int NuevoContacto();
 int ValidarContacto(char[]);
+int NuevoContacto();
 int MostrarContactos();
 int BuscarContacto(char[],char[]);
 
@@ -61,8 +60,8 @@ int BuscarContacto(char[],char[]);
 
 int CargarDatosContacto(char[]);
 int Messenger();
-int FServidor(int);
-int Usuario(const char[], int);
+void FServidor(int);
+void Usuario(const char[], int);
 
 
 /*
@@ -84,7 +83,7 @@ void Error(char *msj_error, int tipo){                            // Recibe un a
 	
 	else if (tipo == 2){
 		system("clear");
-		Ingresar();	         // Se llama a la funcion Ingresar		
+		MostrarContactos();	         // Se llama a la funcion MostrarContactos		
 	}
 
 }
@@ -93,7 +92,7 @@ void Error(char *msj_error, int tipo){                            // Recibe un a
 
 void main () {
 	printf("\033[37m Bienvenido al Messenger para C        \n");
-	Menu ();              // Se carga el Menu Principal e inicia el programa
+	GuardarPuerto();              // Se le solicita el puerto a utilizar al usuario
 	
 }
 
@@ -101,11 +100,11 @@ void main () {
 /** #######    Menu principal    ####### **/
 
 
-// Se le pregunta al usuario si desea registrarse en el sistema o acceder con un usuario existente
+// Menu principal del programa
 
 
 int Menu(){
-	printf("\033[0m                Menú principal                  \n Seleccione la opcion que desea:\n 1)Ingresar con un usuario existente\n 2)Regitrarse en el sistema \n Digite 0 para salir del programa\n");
+	printf("\033[34m            Menú principal         \n \033[0m Seleccione la opcion que desea realizar\n1)Ver la lista de contactos\n2)Agregar un contacto\n3)Iniciar una conversacion \n Digite 0 para salir del programa\n");
 	
 	int salir = 0;
 	int opcion;
@@ -118,16 +117,24 @@ int Menu(){
 		scanf("%d",&opcion);       // Se lee la opcion ingresada por el usuario
 			
 		if (opcion == 1){
-			system("clear");       // Se llama a la función Ingresar
-			Ingresar();
+			system("clear");       // Se llama a la función MostrarContactos
+			MostrarContactos();
 			Menu();}
 			
 		else if (opcion == 2){
 			system("clear");
-			NuevoUsuario();        // Se llama a la función NuevoUsuario
+			NuevoContacto();        // Se llama a la función NuevoContacto
 			Menu();}
 			
-		else exit(0);
+		else if (opcion == 3){
+			system("clear");
+			Messenger();        // Se llama a la función Messenger
+			Menu();}
+			
+		else
+		
+		system("clear");
+		exit(0);
 	}
 	
 	return 0;    // Finaliza exitosamente
@@ -141,94 +148,26 @@ int Menu(){
 
 // 1. Inicio de sesion con un usuario existente
 
-int Ingresar(){
+int GuardarPuerto(){
 	
-	printf("\033[32m Ingrese su nombre de usuario y presione la tecla Enter");
+	system("clear");
 	
-	
-	scanf("%s",user);   // Se asigna a la variable global 'user' el nombre ingresado por el usuario
-	
-	
-	// Se verifica que existe el usuario en el sistema
-	
-	if(!ExisteUsuario(user)){   // Si NO existe
-		Error("No existe el usuario ingresado",1);
-	}
-	
-	
-	// Se ejecuta la funcion para cargar el puerto del usuario registrado.
-	
-	CargarPuerto();
-	
-	
-	// Se ejecuta la funcion para iniciar con el envio y recepcion de mensajes
-	
-	Messenger();
-	
-}
-
-// 2. Registro de un nuevo usuario
-
-
-int NuevoUsuario{
-	
-	// Variables locales
-	
-	char usuario[30];
-	char puerto[8];
-	
-	printf("\033[32m Ingrese los datos que se le solicitan a continuacion\n");
-	
-	printf("\033[39m Nombre de usuario:");
-	scanf(" %[^\n]",usuario);
-	
-    printf("Puerto a utilizar:");
-	scanf(" %[^\n]",puerto);
-	
-	strcat(usuario, ".txt");             // Se agrega la extension del archivo a crear utilizando el nombre del usuario
-	
-	// Se verifica si ya el usuario existe
-	
-	if(ExisteUsuario(usuario)){   // Si existe
-		Error("Ya existe el usuario ingresado",2);
-	}
+	printf("\033[32m Ingrese el puerto que va a utilizar\n");
+	scanf(" %[^\n]",port);
 	
 	FILE *archivo;		
 	
-	archivo = fopen(usuario,"wb");       // Crea el archivo correspondiente al usuario
+	archivo = fopen("Puerto.txt","w");       // Crea el archivo correspondiente al usuario
 	
-	fprintf(archivo,"%s",puerto);        // Nota: REVISAR si se debe de agregar el salto de linea 
+	fprintf(archivo,"%s",port);        
 	fclose(archivo);
 	
-	printf("\033[30m Se ha creado el usuario exitosamente");
+	printf("\033[36m Puerto registrado exitosamente\n");
 	
-	if(access  )
+	Menu();
 	
-	// Se le pregunta al usuario si desea ingresar al sistema con su nueva cuenta o desea cerrar el programa
-	
-	int opcion;
-	
-	scanf("Presione 1 para ingresar al sistema con su usuario u otra tecla para Salir del programa:\n%d",&opcion);
-	
-	if (opcion == 1){
-		system("clear");
-		Ingresar();
-	}
-	else {
-		exit(0);
-		}
-
-		
 	return 0;  // Ejecucion finaliza con exito
 	
-}
-
-// Funcion que verifica si existe un archivo asignado al usuario en el sistema, es decir, si este esta registrado
-
-int ExisteUsuario(char *nombre_archivo)
-{
-  struct stat   buffer;   
-  return (stat (nombre_archivo, &buffer) == 0);
 }
 
 /** !!!!! Manejo de contactos !!!!! **/
@@ -239,51 +178,36 @@ int ExisteUsuario(char *nombre_archivo)
 
 int MostrarContactos( ){
 	
-	FILE *archivo;         // Se apunta a la dirección del archivo
-	
-	// Revisar las 2 opciones de hacer este paso
-	
-	// 1. Opcion
-	char *archivo_usuario = strcat(user, ".txt"); // Apunta al archivo correspondiente al usuario
-	
-	/* 2. Opcion
-	
-	char archivo_usuario[30] = user;
-	strcat(archivo_usuario, ".txt");
-	
-	*/
-	     
-    archivo = fopen(archivo_usuario,"r");  // Almacena la dirección del archivo
+	FILE *archivo;//Es un buffer que almacena la dirección del archivo
     
-    char caracteres[50];   // Buffer de caracteres a leer
+    char caracteres[30];
     
-    // Se verifica que el usuario tenga contactos
+    archivo = fopen("Contactos.txt","r");//Almacena la dirección del archivo
     
-    int ch;
-	int lines = 0;
-	
-	while (EOF != (ch=getchar()))
-	if (ch=='\n')
-	++lines; 
-	
-	if (lines < 2)  {
-		 printf("\033[31m No se tiene ningun contacto registrado\n");
-		 Menu();                        // Se regresa al Menu principal
+    if (archivo == NULL)  {
+		 printf("\033[36m Usted aún no ha agregado ningun contacto\n");
+		 Menu();
 	 }
-	
-	// Se muestran los contactos existentes 
-     
-    while (feof(archivo) == 0) {        // Mientras que no sea el final del documento
-        fgets(caracteres,50,archivo);
+    
+    
+    printf("\033[40m Contactos:\n");
+    
+    while (feof(archivo) == 0) {                //   Mientras que no sea el final del documento
+        fgets(caracteres,30,archivo);           //  Toma caracter por caracter del archivo y lo almacena en caracteres
         
         if(feof(archivo) == 0)
 		printf("\033[33m %s",caracteres);       
         }
-        fclose(archivo);   // Cierra el documento
+            
+    fclose(archivo);//Cierra el documento
+     
+    printf("\033[36m \n");
         
-        return 0;  // Ejecucion finaliza con exito
+    return 0;
 	 
 }
+	 
+
 
 
 
@@ -293,8 +217,8 @@ int MostrarContactos( ){
 int NuevoContacto( ){
 	
 	FILE *archivo;
-	char *usuarios = strcat(user, ".txt");   // Apunta al archivo correspondiente al usuario
-	
+		
+	system("clear");
 			
 	// Variables locales
 	
@@ -302,14 +226,14 @@ int NuevoContacto( ){
 	char ip[16];
 	char puerto[8];
 		
-	archivo = fopen(usuarios,"a");           // Agrega los datos al final del archivo
+	archivo = fopen("Contactos.txt","a");           // Agrega los datos al final del archivo
 	if(archivo == NULL) return -1;
-			
+	
 		
 	printf("\033[34m Ingrese el nombre del usuario a agregar:");
 	scanf(" %[^\n]",usuario);
 	
-	if(!ValidarContacto(usuario))Menu();    // Si el usuario ya existe se devuelve al menu
+	if(!ValidarContacto(usuario))NuevoContacto();	
 	
 	printf("Ingrese el IP:");
 	scanf(" %[^\n]",ip);
@@ -320,6 +244,8 @@ int NuevoContacto( ){
 	fprintf(archivo,"%s\n",ip);
 	fprintf(archivo,"%s\n",puerto);
 	fclose(archivo);
+	
+	printf("\033[31m Usuario agregado con exito\n");
 		
 	return 0;  // Ejecucion finaliza con exito
 		
@@ -339,16 +265,41 @@ int BuscarContacto(char contacto[],char linea[]){
 		}
 		else{
 			while(cont+1!=a){
-				contacto[cont]!=linea[cont]){
-					    // No se encuentra
-				return 0;
+				if(contacto[cont]!=linea[cont]){
+					// No se encuentra
+				    return 0;
 								
-				}cont++;
+				}
+				cont++;
 			} 
 			return 1; // Se encontro el contacto
 					
 		}
-	}
+}
+
+//Método para validar si el contacto que se desea agregar ya esta registrado 
+	int ValidarContacto(char usuario[]){
+		
+		FILE *archivo;
+		
+        char caracteres[30];
+        archivo = fopen("Contactos.txt","r");
+ 
+        if (archivo == NULL)
+                exit(1);
+                
+        while (feof(archivo) == 0) // Se recorre el archivo buscando el usuario
+        {
+                fgets(caracteres,30,archivo);
+                if((BuscarContacto(usuario,caracteres))==1){ // Si se encuentra
+					printf("\n \033[01;31mEl contacto ya se encuentra registrado. \n \n");
+					return 0;
+					}
+					}
+        
+        fclose(archivo);
+        return 1;
+		}
 	
 // Funcion auxiliar para cargar el puerto del usuario
 
@@ -357,11 +308,14 @@ int CargarPuerto(){
 	// Se carga el puerto del usuario ingresado (a ser utilizado por el servidor)
 	
 	FILE *archivo;
-	char *usuario_archivo = strcat(user, ".txt");   // Apunta al archivo correspondiente al usuario
 	
-	archivo = fopen(usuario_archivo,"r");           
+	char *buffer;
+		
+	archivo = fopen("Puerto.txt","r");           
 	
-	fgets(port,9,archivo);                          // Se lee el puerto de usuario (solo la primer linea del archivo) y es asignado a la variable global 'port'
+	fgets(buffer,9,archivo);                           // Se lee el puerto de usuario (solo la primer linea del archivo) y es asignado a la variable global 'port'
+	
+	strcpy(port,buffer);
 	
 	fclose(archivo);
 		
@@ -374,27 +328,23 @@ int CargarPuerto(){
 
 // Cargar las variables de IP y puerto ingresando el nombre de usuario
 
-int CargarDatosContacto(char[] contacto){
+int CargarDatosContacto(char contacto[]){
 	
 	FILE *archivo;
 	char caracteres[40];
 	
-	char *usuario = contacto;
-	strcat(usuario, ".txt");
-	
 	int i=0;  // Recorrido de lineas
-	archivo = fopen(usuario,"r");  // Se trata de abrir el archivo del usuario registrado
+	archivo = fopen("Contactos.txt","r");  // Se trata de abrir el archivo del usuario registrado
         			
 	while (feof(archivo) == 0)  // Recorre el archivo buscando el contacto solicitado
 	{
 		fgets(caracteres,30,archivo);    // Buffer
 		
-		if(((BuscarContacto(usuario,caracteres))==1)||(i>0)){
+		if(((BuscarContacto(contacto,caracteres))==1)||(i>0)){
 			if(i==1)strcpy(ip,caracteres);           // Se copia la IP del contacto
 			if(i==2){strcpy(puerto,caracteres);      // Se copia el puerto del contacto
 			i=0;
-			break;}
-						
+			break;}						
 			i++;
 		}
 						
@@ -404,6 +354,7 @@ int CargarDatosContacto(char[] contacto){
 	return 0;
 	 
 }
+
 	
 // Funcion general para el envio y recepcion de mensajes
 
